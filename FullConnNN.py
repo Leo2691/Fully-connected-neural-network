@@ -131,12 +131,14 @@ class Network:
 
     def predict(self, X):
         Y = []
-        self.forward(X)
-        for i in self.end:
-            Y.append(self.nodes[i].out)
+        for j in np.arange(X.shape[0]):
+            self.forward(X[j, :])
+            y_i = []
+            for i in self.end:
+                y_i.append(self.nodes[i].out)
+            Y.append(y_i)
         return Y
 
-    
     def backprop(self, X, y):
         self.grad_w = np.zeros((len(self.graph), len(self.graph)))
         total_error = np.array([])
@@ -183,15 +185,14 @@ class Network:
             
         self.w = self.w - self.mu * self.grad_w
         return total_error
-                            
-           
-    def adaptation_sgd(self, X, y, mu = 0.5):
+                                     
+    def adaptation_sgd(self, X, y, mu = 0.5, num_lerning_epochs = 1000):
         self.mu = mu
         X = np.array(X) 
         y = np.array(y) 
         
         #cycle for samples
-        for ep in np.arange(1000):
+        for ep in np.arange(num_lerning_epochs):
             er_i = []
             for i in np.arange(X.shape[0]): 
                 self.forward(X[i, :])
@@ -199,16 +200,11 @@ class Network:
 
             self.total_error.append(np.sum(er_i))
         
-        #self.predict(np.array([1,2]))
-        
         plt.plot(self.total_error)
+        plt.grid('on')
         plt.show()
-        a = 1
-            #cycle for backprop
-            #total_error = y - 1
-            #for j in np.arange(self.L, -1, -1):
                 
-np.random.seed(30)            
+np.random.seed(30)           
     
 nw       = Network()
 idIn1    = nw.addNode(type_node=Input) 
@@ -228,17 +224,17 @@ nw.addConnect(idHL2, idOut1), nw.addConnect(idHL2, idOut2)
 
 nw.setDeepOfNodes()
 nw.generateCoeffs()
-X = np.array([[0.1,0.2]])#,
-              #[0.3,0.4],
-              #[0.5,0.6]])
+X = np.array([[0.1,0.2],
+              [0.3,0.4],
+              [0.5,0.6]])
 
-y = np.array([[0.3,0.4]])#,
-              #[0.5,0.6],
-              #[0.7,0.8]])
+y = np.array([[0.3,0.4],
+              [0.5,0.6],
+              [0.7,0.8]])
 
-nw.adaptation_sgd(X, y)
+nw.adaptation_sgd(X, y, mu = 0.5, num_lerning_epochs = 2000)
+Y_pr = nw.predict(np.array([[0.1,0.2], [0.3,0.4]]))
 
 
 a = list()
 a.append(Node(1, '1'))
-
